@@ -12,7 +12,7 @@
 
     # nixvim input (optional to wire now; you can add later)
     nixvim = {
-      url = "github:nix-community/nixvim";
+      url = "github:nix-community/nixvim/nixos-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -29,7 +29,7 @@
           ./configuration.nix
 
           home-manager.nixosModules.home-manager
-          nixvim.homeManagerModules.nixvim
+          nixvim.homeModules.nixvim
 
           ({ ... }: {
             home-manager.useGlobalPkgs = true;

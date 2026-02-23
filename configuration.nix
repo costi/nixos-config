@@ -4,14 +4,10 @@
 
 { config, pkgs, ... }:
 
-let
-  home-manager = builtins.fetchTarball https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz;
-in
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      "${home-manager}/nixos"
     ];
 
   # Bootloader.
@@ -110,37 +106,6 @@ in
     packages = with pkgs; [
     #  thunderbird
     ];
-  };
-
-  home-manager.users.costi = { pkgs, ... }: {
-    home.packages = with pkgs; [ 
-      atool
-      httpie
-      ripgrep
-      fd
-      nodejs
-      python3
-      lua-language-server
-      nil # nix lsp
-    ];
-    programs.bash.enable = true;
-
-    programs.git = {
-      enable = true;
-      settings = {
-        user.name = "Constantin Gavrilescu";
-        user.email = "comisarulmoldovan@gmail.com";
-      };
-    };
-
-    programs.neovim = {
-      enable = true;
-      defaultEditor = true;
-    };
-
-    # The state version is required and should stay at the version you
-    # originally installed.
-    home.stateVersion = "25.11";
   };
 
   # Install firefox.

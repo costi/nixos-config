@@ -82,16 +82,25 @@
   # services.xserver.libinput.enable = true;
 
 
-  # enable minecraft server
-  services.minecraft-server = {
+  # enable minecraft server (Paper via nix-minecraft)
+  services.minecraft-servers = {
     enable = true;
     eula = true;
     openFirewall = true;
-    declarative = true; # PAY ATTENTION - this will make settings here override the ones you set in console
-    serverProperties = {
-      motd = "Awesome fast minecraft server";
-      online-mode = false;
-      enforce-secure-profile = false; # so we can sign in with bots unsigned
+    servers.paper = {
+      enable = true;
+      # Pin Paper to a specific Minecraft version for client compatibility.
+      package = pkgs.paperServers.paper-1_21_10;
+      operators = {
+        # UUID observed in usercache.json for "costitze".
+        costitze = "7cc4fd35-3378-3b3b-9fa2-a4dfa5a9a4a4";
+      };
+      serverProperties = {
+        motd = "Awesome fast minecraft server";
+        # Offline mode so local accounts can join without Mojang auth.
+        online-mode = false;
+        enforce-secure-profile = false; # so we can sign in with bots unsigned
+      };
     };
   };
 

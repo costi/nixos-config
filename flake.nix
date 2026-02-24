@@ -15,9 +15,14 @@
       url = "github:nix-community/nixvim/nixos-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-minecraft = {
+      url = "github:Infinidoge/nix-minecraft";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, nixvim, ... }:
+  outputs = { self, nixpkgs, home-manager, nixvim, nix-minecraft, ... }:
     let
       system = "x86_64-linux";
     in
@@ -26,6 +31,11 @@
         inherit system;
 
         modules = [
+          ({ ... }: {
+            # nix-minecraft ships its own module + overlay for server packages.
+            imports = [ nix-minecraft.nixosModules.minecraft-servers ];
+            nixpkgs.overlays = [ nix-minecraft.overlay ];
+          })
           ./configuration.nix
 
           home-manager.nixosModules.home-manager

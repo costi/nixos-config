@@ -110,6 +110,12 @@
 
   # Install firefox.
   programs.firefox.enable = true;
+  programs.neovim = {
+    enable = true; # system-wide nvim (e.g., root, other users)
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+  };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -121,7 +127,6 @@
     wget
     prismlauncher
     htop
-    neovim # so I have have it even for root user
   ];
 
   # yo enable nvida support

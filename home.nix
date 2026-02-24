@@ -1,6 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, nixvim, ... }:
 
 {
+  imports = [ nixvim.homeModules.nixvim ];
+
   home.stateVersion = "25.11";
 
   programs.bash.enable = true;
@@ -27,21 +29,21 @@
   programs.codex.enable = true;
 
   programs.neovim = {
-    enable = true;
+    enable = false;
     defaultEditor = true;
   };
 
-  # programs.nixvim = {
-  #   enable = true;
+  programs.nixvim = {
+    enable = true;
+    defaultEditor = true;
+    colorschemes.catppuccin.enable = true;
+    plugins.lualine.enable = true;
+    plugins.treesitter.enable = true;
 
-  #   colorschemes.catppuccin.enable = true;
-  #   plugins.lualine.enable = true;
-  #   plugins.treesitter.enable = true;
-  #   
-  #   # Basic options
-  #   options = {
-  #     number = true;
-  #     shiftwidth = 2;
-  #   };
-  # };
+    # Basic options
+    opts = {
+      number = true;
+      shiftwidth = 2;
+    };
+  };
 }

@@ -24,11 +24,24 @@
     nil # nix lsp
   ];
 
+  programs.codex.enable = true;
+
   programs.neovim = {
     enable = true;
     defaultEditor = true;
   };
 
-  # Later, nixvim goes here (example):
-  # programs.nixvim = { enable = true; ... };
+  # programs.nixvim = {
+  #   enable = true;
+
+  #   colorschemes.catppuccin.enable = true;
+  #   plugins.lualine.enable = true;
+  #   plugins.treesitter.enable = true;
+  #   
+  #   # Basic options
+  #   options = {
+  #     number = true;
+  #     shiftwidth = 2;
+  #   };
+  # };
 }

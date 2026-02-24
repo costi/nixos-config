@@ -118,6 +118,10 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # Podman with Docker-compatible socket/CLI
+  virtualisation.podman.enable = true;
+  virtualisation.podman.dockerCompat = true;
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -125,6 +129,24 @@
     wget
     prismlauncher
     htop
+    nodejs_22
+    pnpm
+    bun
+    python3
+    uv
+    rustup
+    sqlite
+    git
+    gh
+    jq
+    yq
+    ripgrep
+    fd
+    bat
+    fzf
+    tree
+    direnv
+    just
   ];
 
   # yo enable nvida support

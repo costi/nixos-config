@@ -113,8 +113,6 @@
   programs.neovim = {
     enable = true; # system-wide nvim (e.g., root, other users)
     defaultEditor = true;
-    viAlias = true;
-    vimAlias = true;
   };
 
   # Allow unfree packages

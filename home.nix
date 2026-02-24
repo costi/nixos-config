@@ -6,6 +6,11 @@
   home.stateVersion = "25.11";
 
   programs.bash.enable = true;
+  # Prefer nixvim in interactive shells while keeping system vi available if needed.
+  programs.bash.shellAliases = {
+    vi = "nvim";
+    vim = "nvim";
+  };
 
   programs.git = {
     enable = true;

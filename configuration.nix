@@ -83,6 +83,7 @@
 
 
   # enable minecraft server (Paper via nix-minecraft)
+  # Paper gives /tps and better performance, and nix-minecraft supports declarative ops.
   services.minecraft-servers = {
     enable = true;
     eula = true;
@@ -156,6 +157,8 @@
     tree
     direnv
     just
+    zellij
+    tmux
   ];
 
   # yo enable nvida support

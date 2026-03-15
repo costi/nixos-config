@@ -4,6 +4,7 @@
   inputs = {
     # Pin nixpkgs to the same release you're on
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
@@ -23,13 +24,18 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, nixvim, nix-minecraft, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, nixvim, nix-minecraft, ... }:
     let
       system = "x86_64-linux";
+      pkgs-unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
     in
     {
       nixosConfigurations.lianli = nixpkgs.lib.nixosSystem {
         inherit system;
+        specialArgs = { inherit pkgs-unstable; };
 
         modules = [
           ({ ... }: {

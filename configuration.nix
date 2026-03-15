@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, pkgs-unstable, ... }:
 
 {
   imports =
@@ -133,6 +133,18 @@
   virtualisation.podman.enable = true;
   virtualisation.podman.dockerCompat = true;
 
+  services.ollama = {
+    enable = true;
+    package = pkgs-unstable.ollama-cuda;
+    acceleration = "cuda";
+    host = "0.0.0.0";
+    port = 11434;
+    openFirewall = true;
+    loadModels = [
+      "qwen3-coder:30b"
+    ];
+  };
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -160,6 +172,8 @@
     just
     zellij
     tmux
+  ] ++ [
+    pkgs-unstable.ollama-cuda
   ];
 
   # yo enable nvida support

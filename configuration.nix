@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports =
@@ -46,12 +46,13 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # Enable the X11 windowing system.
+  # Boot to text mode, but allow starting X manually via `startx`.
   services.xserver.enable = true;
-
-  # Enable the GNOME Desktop Environment.
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
+  services.displayManager.gdm.enable = false;
+  services.xserver.displayManager.startx.enable = true;
+  services.xserver.displayManager.startx.generateScript = true;
+  services.xserver.windowManager.i3.enable = true;
+  systemd.defaultUnit = lib.mkForce "multi-user.target";
 
   # Configure keymap in X11
   services.xserver.xkb = {

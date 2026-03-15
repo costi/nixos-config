@@ -14,13 +14,19 @@ LazyVim-inspired UX and a small set of dev tools.
 
 ## Usage
 
-Build/switch the system:
+Build the system without root to verify evaluation and derivations:
+
+```bash
+nixos-rebuild build --flake .#lianli
+```
+
+Apply the configuration to the machine:
 
 ```bash
 sudo nixos-rebuild switch --flake .#lianli
 ```
 
-Check flake:
+Check the flake:
 
 ```bash
 nix flake check

@@ -172,6 +172,7 @@
     just
     zellij
     tmux
+    nvtopPackages.nvidia
   ] ++ [
     pkgs-unstable.ollama-cuda
   ];

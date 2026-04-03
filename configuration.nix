@@ -127,6 +127,14 @@
     ];
   };
 
+  users.users.sebi = {
+    isNormalUser = true;
+    description = "Sebi";
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGhMzj7ecWvu/f2HSjFGBKw6iVRawLxkn7kBRAWyiYg sebis@notwindows"
+    ];
+  };
+
   # Install firefox.
   programs.firefox.enable = true;
   programs.neovim = {

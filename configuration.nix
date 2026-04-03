@@ -119,6 +119,14 @@
     ];
   };
 
+  users.users.acu = {
+    isNormalUser = true;
+    description = "Dorin Ilie Acu";
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBSiMeGIZv5bexHsg9HgKYDZzwlf4jeCM0pqIQ/NNKTP acu@TELOMERYX1"
+    ];
+  };
+
   # Install firefox.
   programs.firefox.enable = true;
   programs.neovim = {
@@ -137,9 +145,9 @@
     enable = true;
     package = pkgs-unstable.ollama-cuda;
     acceleration = "cuda";
-    host = "0.0.0.0";
+    host = "127.0.0.1";
     port = 11434;
-    openFirewall = true;
+    openFirewall = false;
     loadModels = [
       "qwen3-coder:30b"
     ];
@@ -242,6 +250,33 @@
     };
   };
 
+  services.caddy = {
+    enable = true;
+    environmentFile = "/var/lib/caddy/ollama.env";
+    virtualHosts."ollama.random-studios.net".extraConfig = ''
+      @authorized {
+        header Authorization "Bearer {$COSTI_TOKEN}"
+        header Authorization "Bearer {$DORIN_TOKEN}"
+      }
+
+      handle @authorized {
+        # Ollama rejects requests when the upstream Host header is the public hostname.
+        reverse_proxy 127.0.0.1:11434 {
+          header_up Host {upstream_hostport}
+        }
+      }
+
+      handle {
+        respond "unauthorized" 401
+      }
+    '';
+    virtualHosts."lol.random-studios.net".extraConfig = ''
+      handle {
+        respond "<h1>LOL!!!!</h1><p>YOU LAUGH YOU DIE</p>"
+      }
+    '';
+  };
+
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
   services.openssh.settings = {
@@ -251,7 +286,7 @@
   };
 
   # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;

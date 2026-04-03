@@ -25,6 +25,9 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
+  # This host is behind a Wi-Fi repeater that does not pass IPv6, and new Codex
+  # tries IPv6 first before falling back to IPv4 after timing out for about 2 minutes.
+  networking.enableIPv6 = false;
 
   # Set your time zone.
   time.timeZone = "America/Chicago";

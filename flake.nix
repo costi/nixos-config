@@ -23,9 +23,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # hermes AI agent
+    hermes-agent.url = "github:NousResearch/hermes-agent";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, nixvim, nix-minecraft, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, nixvim, nix-minecraft, hermes-agent, ... }:
     let
       system = "x86_64-linux";
       pkgs-unstable = import nixpkgs-unstable {
@@ -41,7 +43,7 @@
 
       nixosConfigurations.lianli = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit pkgs-unstable; };
+        specialArgs = { inherit pkgs-unstable hermes-agent; };
 
         modules = [
           ({ ... }: {
@@ -53,12 +55,12 @@
 
           home-manager.nixosModules.home-manager
           
-	  # nixvim.homeModules.nixvim
+          # nixvim.homeModules.nixvim
 
           ({ ... }: {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = { inherit nixvim; };
+            home-manager.extraSpecialArgs = { inherit nixvim hermes-agent; };
             home-manager.users.costi = import ./home.nix;
           })
         ];

@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, lib, pkgs, pkgs-unstable, ... }:
+{ config, lib, pkgs, pkgs-unstable, hermes-agent, ... }:
 
 {
   imports =
@@ -110,6 +110,8 @@
   users.users.costi = {
     isNormalUser = true;
     description = "Constantin Gavrilescu";
+    # Keep the user manager alive after logout so Hermes can keep running.
+    linger = true;
     extraGroups = [ "networkmanager" "wheel" ];
     openssh.authorizedKeys.keys = [
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDh132yLWmzThEcR66D0VFSH0RpT2XfU5m7waEeebOEgXrnLeLvijIV2TNm0ew0PX8AQiiszURFcJ53Tx7RQCKvszKhOIh40+DAeoIbIP6OhQLDkL5r9cQWRboaSN8WcAzEay3m243MfQWimsZKvOGlpk68sw8YdjEFulUZ9cCLZRURq5vie0e/m8VOsfFjt4EXObKp4GoBzzyzyd77f2pWgdpbbGv+LEUvZWgYmNfEM+v21dn87wZN1vbDWkNH7eofa+P1DNX0yahfyuewjOvd/jtaJertyiLcVKKZ0Ws3tV5EkDJjt+NIEzQLi8NwiN1al7z5LTKeUN+1XmHqAZYj costi@costi-linux-zuper"
@@ -190,8 +192,12 @@
     tmux
     nvtopPackages.nvidia
   ] ++ [
+    # Install Hermes from the system generation so the binary is rooted and
+    # available on PATH, while the gateway itself still runs as a user service.
+    hermes-agent.packages.${pkgs.system}.default
     pkgs-unstable.ollama-cuda
     pkgs-unstable.codex
+    pkgs-unstable.opencode
   ];
 
   # yo enable nvida support

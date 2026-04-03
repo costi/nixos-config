@@ -1,4 +1,4 @@
-{ pkgs, nixvim, ... }:
+{ pkgs, nixvim, hermes-agent, ... }:
 
 {
   imports = [ nixvim.homeModules.nixvim ];
@@ -35,6 +35,31 @@
   programs.neovim = {
     enable = false;
     defaultEditor = true;
+  };
+
+  # Hermes is intentionally run as a user service, not as a system-wide daemon,
+  # so its state stays under ~/.hermes and each user can own their own agent.
+  # This also replaces the imperative `hermes gateway install` unit.
+  systemd.user.services.hermes-gateway = {
+    Unit = {
+      Description = "Hermes Agent Gateway";
+      After = [ "network.target" ];
+    };
+
+    Service = {
+      Type = "simple";
+      ExecStart = "${hermes-agent.packages.${pkgs.system}.default}/bin/hermes gateway run --replace";
+      WorkingDirectory = "%h";
+      Environment = [
+        "HERMES_HOME=%h/.hermes"
+      ];
+      Restart = "on-failure";
+      RestartSec = 30;
+    };
+
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
   };
 
   programs.nixvim = {

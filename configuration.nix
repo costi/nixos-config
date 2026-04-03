@@ -183,6 +183,7 @@
     nvtopPackages.nvidia
   ] ++ [
     pkgs-unstable.ollama-cuda
+    pkgs-unstable.codex
   ];
 
   # yo enable nvida support

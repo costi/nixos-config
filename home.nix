@@ -32,8 +32,6 @@
     lazygit
   ];
 
-  programs.codex.enable = true;
-
   programs.neovim = {
     enable = false;
     defaultEditor = true;

@@ -31,9 +31,14 @@
       pkgs-unstable = import nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;
+        overlays = [
+          (import ./overlays/ollama-0_20.nix)
+        ];
       };
     in
     {
+      packages.${system}.ollama-cuda-0_20 = pkgs-unstable.ollama-cuda;
+
       nixosConfigurations.lianli = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit pkgs-unstable; };

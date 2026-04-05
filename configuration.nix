@@ -194,6 +194,8 @@
     zellij
     tmux
     nvtopPackages.nvidia
+    mosh # for better ssh support
+    fastfetch # just for fun so we can see what's installed
   ] ++ [
     # Install Hermes from the system generation so the binary is rooted and
     # available on PATH, while the gateway itself still runs as a user service.

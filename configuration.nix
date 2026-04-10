@@ -272,23 +272,11 @@
   services.caddy = {
     enable = true;
     environmentFile = "/var/lib/caddy/ollama.env";
-    virtualHosts."ollama.random-studios.net".extraConfig = ''
-      @authorized {
-        header Authorization "Bearer {$COSTI_TOKEN}"
-        header Authorization "Bearer {$DORIN_TOKEN}"
-      }
-
-      handle @authorized {
-        # Ollama rejects requests when the upstream Host header is the public hostname.
-        reverse_proxy 127.0.0.1:11434 {
-          header_up Host {upstream_hostport}
-        }
-      }
-
-      handle {
-        respond "unauthorized" 401
-      }
-    '';
+    virtualHosts."ollama.random-studios.net".extraConfig =
+      lib.replaceStrings
+        [ "__OLLAMA_SITE_ROOT__" ]
+        [ "${./caddy/ollama-site}" ]
+        (builtins.readFile ./caddy/ollama.random-studios.net.caddy);
     virtualHosts."lol.random-studios.net".extraConfig = ''
       handle {
         respond "<h1>LOL!!!!</h1><p>YOU LAUGH YOU DIE</p>"

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Random Studios Ollama</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #111318;
+        --panel: #171a21;
+        --panel-2: #1f2430;
+        --text: #f3f5f7;
+        --muted: #aeb6c2;
+        --accent: #7dd3fc;
+        --accent-2: #f59e0b;
+        --border: #2a3140;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Iosevka", "JetBrains Mono", monospace;
+        background:
+          radial-gradient(circle at top left, rgba(125, 211, 252, 0.15), transparent 32rem),
+          radial-gradient(circle at top right, rgba(245, 158, 11, 0.14), transparent 28rem),
+          var(--bg);
+        color: var(--text);
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 48px 20px 80px;
+      }
+      h1, h2 { line-height: 1.1; }
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(2.2rem, 6vw, 4.5rem);
+      }
+      h2 {
+        margin: 36px 0 12px;
+        font-size: 1.2rem;
+      }
+      p, li { color: var(--muted); font-size: 1rem; }
+      .hero {
+        padding: 28px;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(23, 26, 33, 0.94), rgba(17, 19, 24, 0.96));
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+      }
+      .eyebrow {
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 0.78rem;
+      }
+      .grid {
+        display: grid;
+        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        margin-top: 24px;
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 20px;
+        background: var(--panel);
+      }
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        padding: 18px;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 0.92rem;
+      }
+      code {
+        font-family: inherit;
+        color: var(--accent);
+      }
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+      .models {
+        columns: 2 260px;
+        gap: 28px;
+      }
+      .models li {
+        break-inside: avoid;
+        margin-bottom: 8px;
+      }
+      .note {
+        color: var(--text);
+      }
+      a { color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Random Studios</div>
+        <h1>Ollama Proxy</h1>
+        <p class="note">Use <code>https://ollama.random-studios.net/v1</code> as your OpenAI-compatible base URL.</p>
+      </section>
+
+      <div class="grid">
+        <section class="card">
+          <h2>OpenCode</h2>
+          <p>In OpenCode, type <code>/connect</code> and select <code>ollama.random-studios.net</code>.</p>
+          <p>Example provider config:</p>
+          <pre>{
+  &quot;$schema&quot;: &quot;https://opencode.ai/config.json&quot;,
+  &quot;provider&quot;: {
+    &quot;ollama&quot;: {
+      &quot;npm&quot;: &quot;@ai-sdk/openai-compatible&quot;,
+      &quot;name&quot;: &quot;Random Studios Ollama&quot;,
+      &quot;options&quot;: {
+        &quot;baseURL&quot;: &quot;https://ollama.random-studios.net/v1&quot;
+      },
+      &quot;models&quot;: {
+        &quot;qwen3.5:latest&quot;: {
+          &quot;name&quot;: &quot;Qwen 3.5 Default (9B dense, ~11 GB VRAM, shared default)&quot;
+        },
+        &quot;qwen3-coder:30b&quot;: {
+          &quot;name&quot;: &quot;Qwen3 Coder 30B (coding-focused, ~18 GB VRAM)&quot;
+        },
+        &quot;qwen3-coder:latest&quot;: {
+          &quot;name&quot;: &quot;Qwen3 Coder Latest (coding-focused, ~18 GB installed)&quot;
+        },
+        &quot;deepseek-ocr:latest&quot;: {
+          &quot;name&quot;: &quot;DeepSeek OCR (OCR model, ~6.7 GB installed)&quot;
+        },
+        &quot;gemma4:26b&quot;: {
+          &quot;name&quot;: &quot;Gemma 4 26B (~17 GB installed)&quot;
+        },
+        &quot;gemma4:31b&quot;: {
+          &quot;name&quot;: &quot;Gemma 4 31B (~19 GB installed)&quot;
+        },
+        &quot;gemma4:e2b&quot;: {
+          &quot;name&quot;: &quot;Gemma 4 E2B (lighter general model, ~7.2 GB installed)&quot;
+        },
+        &quot;gemma4:latest&quot;: {
+          &quot;name&quot;: &quot;Gemma 4 Latest (~9.6 GB installed)&quot;
+        },
+        &quot;glm-ocr:latest&quot;: {
+          &quot;name&quot;: &quot;GLM OCR (OCR model, ~2.2 GB installed)&quot;
+        },
+        &quot;olmo-3.1:32b-instruct&quot;: {
+          &quot;name&quot;: &quot;OLMo 3.1 32B Instruct (~19 GB installed)&quot;
+        },
+        &quot;olmo-3.1:latest&quot;: {
+          &quot;name&quot;: &quot;OLMo 3.1 Latest (~19 GB installed)&quot;
+        },
+        &quot;qwen3.5:27b&quot;: {
+          &quot;name&quot;: &quot;qwen3.5:27b (17 GB installed)&quot;
+        }
+      }
+    }
+  }
+}</pre>
+          <p><code>qwen3.5:latest</code> is the recommended shared default when multiple people are using the box at the same time.</p>
+        </section>
+
+        <section class="card">
+          <h2>Auth</h2>
+          <p>Requests to the API require a bearer token.</p>
+          <pre>Authorization: Bearer &lt;your-token&gt;</pre>
+          <p>The homepage is public. API endpoints stay protected.</p>
+        </section>
+      </div>
+
+      <section class="card">
+        <h2>Qwen 3.5 Notes</h2>
+        <ul>
+          <li><code>qwen3.5:latest</code> currently points to the <code>9B</code> variant in the Ollama library.</li>
+          <li>The <code>0.8B</code>, <code>2B</code>, <code>4B</code>, <code>9B</code>, and <code>27B</code> Qwen 3.5 variants are dense models.</li>
+          <li>The larger <code>35B-A3B</code> and <code>122B-A16B</code> variants are MoE models, where only part of the model is active per token.</li>
+          <li>Approximate Ollama footprint: <code>qwen3.5:latest</code> is listed at <code>11 GB</code>; <code>qwen3.5:27b</code> is listed at <code>30 GB</code>.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Available Models</h2>
+        <ul class="models">
+          <li><code>qwen3.5:latest</code> <span>recommended default, 9B dense, installed size 6.6 GB</span></li>
+          <li><code>qwen3-coder:30b</code> <span>heavy coder model, installed size 18 GB</span></li>
+          <li><code>qwen3-coder:latest</code> <span>coding-focused alias, installed size 18 GB</span></li>
+          <li><code>deepseek-ocr:latest</code> <span>OCR model, installed size 6.7 GB</span></li>
+          <li><code>gemma4:26b</code> <span>installed size 17 GB</span></li>
+          <li><code>gemma4:31b</code> <span>installed size 19 GB</span></li>
+          <li><code>gemma4:e2b</code> <span>lighter general model, installed size 7.2 GB</span></li>
+          <li><code>gemma4:latest</code> <span>installed size 9.6 GB</span></li>
+          <li><code>glm-ocr:latest</code> <span>OCR model, installed size 2.2 GB</span></li>
+          <li><code>olmo-3.1:32b-instruct</code> <span>installed size 19 GB</span></li>
+          <li><code>olmo-3.1:latest</code> <span>installed size 19 GB</span></li>
+          <li><code>qwen3.5:27b</code> <span>installed size 17 GB</span></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

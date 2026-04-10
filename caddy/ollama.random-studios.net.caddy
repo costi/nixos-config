@@ -1,0 +1,26 @@
+@authorized {
+  header Authorization "Bearer {$COSTI_TOKEN}"
+  header Authorization "Bearer {$DORIN_TOKEN}"
+  header Authorization "Bearer {$SEBI_TOKEN}"
+}
+
+@homepage {
+  path /
+}
+
+handle @authorized {
+  # Ollama rejects requests when the upstream Host header is the public hostname.
+  reverse_proxy 127.0.0.1:11434 {
+    header_up Host {upstream_hostport}
+  }
+}
+
+handle @homepage {
+  root * __OLLAMA_SITE_ROOT__
+  rewrite * /index.html
+  file_server
+}
+
+handle {
+  respond "unauthorized" 401
+}

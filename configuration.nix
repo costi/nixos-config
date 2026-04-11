@@ -294,7 +294,10 @@
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [ 80 443 ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  # Mosh uses a high UDP port range by default.
+  networking.firewall.allowedUDPPortRanges = [
+    { from = 60000; to = 61000; }
+  ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 

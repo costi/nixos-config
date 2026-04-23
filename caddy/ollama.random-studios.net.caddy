@@ -1,17 +1,43 @@
-@authorized {
-  header Authorization "Bearer {$COSTI_TOKEN}"
-  header Authorization "Bearer {$DORIN_TOKEN}"
-  header Authorization "Bearer {$SEBI_TOKEN}"
-}
-
 @homepage {
   path /
 }
 
-handle @authorized {
+@costi {
+  header Authorization "Bearer {$COSTI_TOKEN}"
+}
+
+handle @costi {
+  vars ollama_user costi
   # Ollama rejects requests when the upstream Host header is the public hostname.
   reverse_proxy 127.0.0.1:11434 {
     header_up Host {upstream_hostport}
+    header_up X-Ollama-User {http.vars.ollama_user}
+  }
+}
+
+@dorin {
+  header Authorization "Bearer {$DORIN_TOKEN}"
+}
+
+handle @dorin {
+  vars ollama_user dorin
+  # Ollama rejects requests when the upstream Host header is the public hostname.
+  reverse_proxy 127.0.0.1:11434 {
+    header_up Host {upstream_hostport}
+    header_up X-Ollama-User {http.vars.ollama_user}
+  }
+}
+
+@sebi {
+  header Authorization "Bearer {$SEBI_TOKEN}"
+}
+
+handle @sebi {
+  vars ollama_user sebi
+  # Ollama rejects requests when the upstream Host header is the public hostname.
+  reverse_proxy 127.0.0.1:11434 {
+    header_up Host {upstream_hostport}
+    header_up X-Ollama-User {http.vars.ollama_user}
   }
 }
 

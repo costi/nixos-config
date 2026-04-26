@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Random Studios Ollama</title>
+    <title>Random Studios vLLM</title>
     <style>
       :root {
         color-scheme: dark;
@@ -102,7 +102,7 @@
     <main>
       <section class="hero">
         <div class="eyebrow">Random Studios</div>
-        <h1>Ollama Proxy</h1>
+        <h1>vLLM Gateway</h1>
         <p class="note">Use <code>https://ollama.random-studios.net/v1</code> as your OpenAI-compatible base URL.</p>
       </section>
 
@@ -112,7 +112,7 @@
           <p>In OpenCode, type <code>/connect</code> and select <code>ollama.random-studios.net</code>.</p>
           <p>Example provider config:</p>
           <pre>{{OPENCODE_CONFIG}}</pre>
-          <p><code>{{RECOMMENDED_MODEL}}</code> is the recommended shared default when multiple people are using the box at the same time.</p>
+          <p><code>{{RECOMMENDED_MODEL}}</code> is the shared model currently served by the box.</p>
         </section>
 
         <section class="card">
@@ -124,12 +124,12 @@
       </div>
 
       <section class="card">
-        <h2>Qwen 3.5 Notes</h2>
+        <h2>Serving Notes</h2>
         <ul>
-          <li><code>qwen3.5:latest</code> currently points to the <code>9B</code> variant in the Ollama library.</li>
-          <li>The <code>0.8B</code>, <code>2B</code>, <code>4B</code>, <code>9B</code>, and <code>27B</code> Qwen 3.5 variants are dense models.</li>
-          <li>The larger <code>35B-A3B</code> and <code>122B-A16B</code> variants are MoE models, where only part of the model is active per token.</li>
-          <li>Approximate Ollama footprint: <code>qwen3.5:latest</code> is listed at <code>11 GB</code>; <code>qwen3.5:27b</code> is listed at <code>30 GB</code>.</li>
+          <li>This endpoint is now backed by <code>vLLM</code>, not Ollama.</li>
+          <li>The gateway currently serves one shared model at a time.</li>
+          <li>Clients should continue using the same bearer-token auth and <code>/v1</code> OpenAI-compatible API path.</li>
+          <li>Some Ollama-specific features such as model listing and per-user upstream headers are no longer part of the backend.</li>
         </ul>
       </section>
 

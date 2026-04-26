@@ -153,18 +153,6 @@
   virtualisation.podman.enable = true;
   virtualisation.podman.dockerCompat = true;
 
-  services.ollama = {
-    enable = true;
-    package = pkgs-unstable.ollama-cuda;
-    acceleration = "cuda";
-    host = "127.0.0.1";
-    port = 11434;
-    openFirewall = false;
-    loadModels = [
-      "qwen3-coder:30b"
-    ];
-  };
-
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -190,16 +178,17 @@
     tree
     direnv
     just
-    zellij
     tmux
     nvtopPackages.nvidia
     mosh # for better ssh support
     fastfetch # just for fun so we can see what's installed
+    lshw # to see what mb I have
+    bandwhich # to monitor downloads
   ] ++ [
     # Install Hermes from the system generation so the binary is rooted and
     # available on PATH, while the gateway itself still runs as a user service.
     hermes-agent.packages.${pkgs.system}.default
-    pkgs-unstable.ollama-cuda
+    pkgs-unstable.zellij
     pkgs-unstable.codex
     pkgs-unstable.opencode
   ];

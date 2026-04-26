@@ -286,22 +286,6 @@
         "type": "github"
       }
     },
-    "pkgs-vllm": {
-      "locked": {
-        "lastModified": 1775517336,
-        "narHash": "sha256-2w7HDTh29BmVGZLIK1UEWt1ToIaKS5HA5/n5FH4RYKI=",
-        "owner": "CertainLach",
-        "repo": "nixpkgs",
-        "rev": "6a0675328368bf98ee84dd0ef64b60f1c9d8a06e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "CertainLach",
-        "ref": "push-lklxouywkrnv",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "pyproject-build-systems": {
       "inputs": {
         "nixpkgs": [
@@ -397,8 +381,7 @@
         "nix-minecraft": "nix-minecraft",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-unstable": "nixpkgs-unstable",
-        "nixvim": "nixvim",
-        "pkgs-vllm": "pkgs-vllm"
+        "nixvim": "nixvim"
       }
     },
     "systems": {

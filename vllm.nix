@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   pkgs-vllm, # note: set in flake.nix to "github:CertainLach/nixpkgs/push-lklxouywkrnv";
   ...
@@ -58,6 +59,26 @@ in
     util-linux
   ];
 
+  # Declaratively cap both RTX 3090s before inference starts. NixOS has
+  # NVIDIA power-management options, but not a first-class per-GPU power-limit
+  # option, so keep this as a small systemd unit rooted in the configured NVIDIA
+  # driver package. 250 W is a good efficiency point for 3090 inference and keeps
+  # the two-card setup under the worst-case 600W. Hoping to help with the fact
+  # that I have only a 850W power supply.
+  systemd.services.nvidia-power-limit = {
+    description = "Set NVIDIA GPU persistence mode and power limit";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "vllm.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = builtins.concatStringsSep " " [
+        "${pkgs.bash}/bin/bash -euc"
+        "'for gpu in 0 1; do ${config.hardware.nvidia.package.bin}/bin/nvidia-smi -i \"$gpu\" -pm 1; ${config.hardware.nvidia.package.bin}/bin/nvidia-smi -i \"$gpu\" -pl 250; done'"
+      ];
+    };
+  };
+
   # Manual model download helper. This is intentionally a separate oneshot
   # service instead of ExecStartPre on vllm.service: downloading tens of GB is an
   # operational step, not part of starting the inference server. Usage after
@@ -96,12 +117,16 @@ in
 
   systemd.services.vllm = {
     description = "vLLM inference server";
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
+    after = [ "network-online.target" "nvidia-power-limit.service" ];
+    wants = [ "network-online.target" "nvidia-power-limit.service" ];
     wantedBy = [ "multi-user.target" ];
 
     environment = {
       HF_HOME = "/var/lib/vllm/huggingface";
+      # Make the intended two-card serving topology explicit for future readers
+      # and for any CUDA libraries that inspect visible devices before vLLM's
+      # tensor-parallel worker setup.
+      CUDA_VISIBLE_DEVICES = "0,1";
       VLLM_CPU_KVCACHE_SPACE = "8";
       # PyTorch suggested this after a near-capacity CUDA allocation failure;
       # it can reduce fragmentation when vLLM profiles/loads large models.
@@ -111,35 +136,36 @@ in
     serviceConfig = {
       ExecStart = builtins.concatStringsSep " " [
             "${vllmPatched}/bin/vllm serve ${model}"
+            # Expose a stable API model id instead of leaking the local
+            # /var/lib/vllm path through /v1/models and client configs.
+            "--served-model-name qwen3-coder"
             "--host 127.0.0.1"
             "--port 8000"
-            # 0.90 left only 0.14 GiB for KV cache after loading this 27B model.
-            # At 0.95, vLLM should fit ~13k context; use 0.97 so two-request
-            # serving can target a 16k coding context. If this conflicts with X
-            # display/other CUDA processes, lower max_model_len before lowering
-            # reliability-critical system services.
-            "--gpu-memory-utilization 0.98"
+            # Shard the model across both 24 GiB RTX 3090s. The old one-card
+            # setup had to spend almost the entire GPU on weights and left very
+            # little context; tensor parallelism splits weights/KV heads across
+            # both cards and is the vLLM-native way to use the new second GPU.
+            "--tensor-parallel-size 2"
+            # 0.90 left only 0.14 GiB for KV cache on one 3090 after loading this
+            # 27B model. With two cards, keep a little driver/runtime headroom
+            # but use most VRAM for the longer coding context target.
+            "--gpu-memory-utilization 0.95"
             "--enable-prefix-caching"
             "--enable-chunked-prefill"
-            # The 27B INT4/AWQ model nearly fills the RTX 3090 during vLLM's
-            # startup profiling. The previous 32k/16seq/32k-batched settings
-            # OOMed while flash-attention tried to allocate another ~288 MiB.
-            # Keep the first working target conservative; raise these only after
-            # confirming actual free VRAM in `journalctl -u vllm` / `nvidia-smi`.
-            # Keep concurrency very low on the 24GB RTX 3090. Extra concurrent
-            # requests need more scheduler/KV headroom; for this personal coding
-            # endpoint, two simultaneous sequences is enough and saves VRAM.
-            # Keep max_num_batched_tokens at 8192 so chunked prefill caps a
-            # single scheduling step's memory use, while max_model_len allows a
-            # longer 16k total request context for coding tasks.
+            # Two cards should leave substantially more room for context than the
+            # previous 23K single-card ceiling. Keep concurrency low for a
+            # personal coding endpoint and cap chunked prefill memory per
+            # scheduling step while allowing a 64K total request context.
             "--max-num-batched-tokens 8192"
             "--max-num-seqs 2"
-            "--max-model-len 23K"
+            "--max-model-len 256K"
             "--async-scheduling"
             "--reasoning-parser qwen3"
             "--default-chat-template-kwargs '{\"enable_thinking\": true}'"
             "--enable-auto-tool-choice"
-            "--tool-call-parser hermes"
+            "--tool-call-parser qwen3_coder"
+	    "--language-model-only" # we don't need vision, we only want coding
+	    "--speculative-config '{\"method\": \"mtp\", \"num_speculative_tokens\": 2}'"
           ];
       Restart = "on-failure";
       RestartSec = 10;

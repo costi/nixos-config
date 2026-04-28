@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  download-vllm-model <hf-repo-id> [local-dir]
+
+Examples:
+  download-vllm-model Qwen/Qwen3.6-27B-FP8
+  download-vllm-model cyankiwi/Qwen3.6-27B-AWQ-INT4
+  download-vllm-model Qwen/Qwen3.6-27B-FP8 /var/lib/vllm/models/Qwen--Qwen3.6-27B-FP8
+
+Default local-dir:
+  /var/lib/vllm/models/<org>--<repo>
+
+The download runs as the vllm system user and uses:
+  HF_HOME=/var/lib/vllm/huggingface
+EOF
+}
+
+if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ $# -lt 1 || $# -gt 2 ]]; then
+  usage >&2
+  exit 2
+fi
+
+repo="$1"
+if [[ "$repo" != */* ]]; then
+  echo "error: expected a Hugging Face repo id like Qwen/Qwen3.6-27B-FP8" >&2
+  exit 2
+fi
+
+# Match the directory convention used in vllm.nix, e.g.
+# Qwen/Qwen3.6-27B-FP8 -> /var/lib/vllm/models/Qwen--Qwen3.6-27B-FP8
+safe_repo="${repo//\//--}"
+model_dir="${2:-/var/lib/vllm/models/${safe_repo}}"
+hf_home="${HF_HOME:-/var/lib/vllm/huggingface}"
+
+if ! id vllm >/dev/null 2>&1; then
+  echo "error: vllm user does not exist. Switch the NixOS config that defines users.users.vllm first." >&2
+  exit 1
+fi
+
+hf_bin="${HF_BIN:-}"
+if [[ -z "$hf_bin" ]]; then
+  if command -v hf >/dev/null 2>&1; then
+    hf_bin="$(command -v hf)"
+  elif [[ -x /run/current-system/sw/bin/hf ]]; then
+    hf_bin="/run/current-system/sw/bin/hf"
+  else
+    echo "error: hf CLI not found. Add pythonPackages.huggingface-hub to environment.systemPackages and switch." >&2
+    exit 1
+  fi
+fi
+
+if [[ ! -x "$hf_bin" ]]; then
+  echo "error: hf CLI is not executable: $hf_bin" >&2
+  exit 1
+fi
+
+echo "Repo:      $repo"
+echo "Model dir: $model_dir"
+echo "HF_HOME:   $hf_home"
+echo "hf CLI:    $hf_bin"
+
+sudo install -d -o vllm -g vllm "$model_dir" "$hf_home"
+
+# Use the absolute hf path so sudo does not depend on the vllm user's PATH.
+sudo -u vllm -H env HF_HOME="$hf_home" "$hf_bin" download "$repo" --local-dir "$model_dir"
+
+cat <<EOF
+
+Done.
+
+For vllm.nix, use:
+  modelRepo = "$repo";
+  modelDir = "$model_dir";
+  model = modelDir;
+EOF

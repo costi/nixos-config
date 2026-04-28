@@ -32,6 +32,34 @@
     lazygit
   ];
 
+  # Configure pi-coding-agent declaratively for Costi. The local inference
+  # endpoint is vLLM on port 8000, not Ollama on 11434; vLLM exposes an
+  # OpenAI-compatible /v1/chat/completions API and ignores the dummy API key.
+  # vllm.nix sets --served-model-name so clients can use a stable model id
+  # instead of the local /var/lib/vllm model directory path.
+  home.file.".pi/agent/models.json".text = builtins.toJSON {
+    providers = {
+      vllm = {
+        baseUrl = "http://localhost:8000/v1";
+        api = "openai-completions";
+        apiKey = "vllm";
+        compat = {
+          supportsDeveloperRole = false;
+          supportsReasoningEffort = false;
+        };
+        models = [
+          {
+            id = "qwen3-coder";
+            name = "qwen3-coder";
+            reasoning = true;
+            contextWindow = 262144;
+            maxTokens = 32768;
+          }
+        ];
+      };
+    };
+  };
+
   programs.neovim = {
     enable = false;
     defaultEditor = true;

@@ -191,6 +191,10 @@
     pkgs-unstable.zellij
     pkgs-unstable.codex
     pkgs-unstable.opencode
+    # Nixpkgs unstable already packages @mariozechner/pi-coding-agent and
+    # exposes the same `pi` CLI that `npm install -g` would install, without
+    # leaving mutable npm-managed state in the system profile.
+    pkgs-unstable.pi-coding-agent
   ];
 
   # yo enable nvida support

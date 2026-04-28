@@ -4,6 +4,25 @@
 
 { config, lib, pkgs, pkgs-unstable, hermes-agent, ... }:
 
+let
+  rebuild-switch = pkgs.writeShellScriptBin "rebuild-switch" ''
+    set -euo pipefail
+
+    repo=/home/costi/nixos-config
+    cd "$repo"
+
+    echo "==> Building lianli system toplevel without switching..."
+    nix build --no-link ".#nixosConfigurations.lianli.config.system.build.toplevel" \
+      --max-jobs 2 \
+      --cores 8
+
+    echo "==> Build OK, switching..."
+    exec /run/current-system/sw/bin/nixos-rebuild switch \
+      --flake /home/costi/nixos-config/.#lianli \
+      --max-jobs 2 \
+      --cores 8
+  '';
+in
 {
   imports =
     [
@@ -178,7 +197,27 @@
     };
   };
 
-  security.rtkit.enable = true;
+  security = {
+    rtkit.enable = true;
+    sudo = {
+      enable = true;
+      extraRules = [
+        {
+          users = [ "costi" ];
+          commands = [
+            {
+              # Allow Hermes to apply this exact NixOS rebuild helper without a
+              # password. The root-owned /run/current-system path avoids a broad
+              # /nix/store/* sudo wildcard, and the empty-argument matcher keeps
+              # the rule scoped to the helper's baked-in command sequence.
+              command = "/run/current-system/sw/bin/rebuild-switch \"\"";
+              options = [ "NOPASSWD" ];
+            }
+          ];
+        }
+      ];
+    };
+  };
 
   # Define a user account. Don't forget to set a password with 'passwd'.
   users.users = {
@@ -263,6 +302,7 @@
     lshw # to see what mb I have
     bandwhich # to monitor downloads
   ] ++ [
+    rebuild-switch
     # Install Hermes from the system generation so the binary is rooted and
     # available on PATH, while the gateway itself still runs as a user service.
     hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default

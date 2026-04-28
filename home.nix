@@ -3,60 +3,69 @@
 {
   imports = [ nixvim.homeModules.nixvim ];
 
-  home.stateVersion = "25.11";
+  home = {
+    stateVersion = "25.11";
 
-  programs.bash.enable = true;
-  # Prefer nixvim in interactive shells while keeping system vi available if needed.
-  programs.bash.shellAliases = {
-    vi = "nvim";
-    vim = "nvim";
-    n = "nvim";
-  };
+    packages = with pkgs; [
+      atool
+      httpie
+      ripgrep
+      fd
+      nodejs
+      python3
+      lua-language-server
+      nil # nix lsp
+      lazygit
+      nixpkgs-fmt
+      statix
+      pre-commit
+    ];
 
-  programs.git = {
-    enable = true;
-    settings = {
-      user.name = "Constantin Gavrilescu";
-      user.email = "comisarulmoldovan@gmail.com";
+    # Configure pi-coding-agent declaratively for Costi. The local inference
+    # endpoint is vLLM on port 8000, not Ollama on 11434; vLLM exposes an
+    # OpenAI-compatible /v1/chat/completions API and ignores the dummy API key.
+    # vllm.nix sets --served-model-name so clients can use a stable model id
+    # instead of the local /var/lib/vllm model directory path.
+    file.".pi/agent/models.json".text = builtins.toJSON {
+      providers = {
+        vllm = {
+          baseUrl = "http://localhost:8000/v1";
+          api = "openai-completions";
+          apiKey = "vllm";
+          compat = {
+            supportsDeveloperRole = false;
+            supportsReasoningEffort = false;
+          };
+          models = [
+            {
+              id = "qwen3-coder";
+              name = "qwen3-coder";
+              reasoning = true;
+              contextWindow = 262144;
+              maxTokens = 32768;
+            }
+          ];
+        };
+      };
     };
   };
 
-  home.packages = with pkgs; [
-    atool
-    httpie
-    ripgrep
-    fd
-    nodejs
-    python3
-    lua-language-server
-    nil # nix lsp
-    lazygit
-  ];
+  programs = {
+    bash = {
+      enable = true;
+      # Prefer nixvim in interactive shells while keeping system vi available if needed.
+      shellAliases = {
+        vi = "nvim";
+        vim = "nvim";
+        n = "nvim";
+      };
+    };
 
-  # Configure pi-coding-agent declaratively for Costi. The local inference
-  # endpoint is vLLM on port 8000, not Ollama on 11434; vLLM exposes an
-  # OpenAI-compatible /v1/chat/completions API and ignores the dummy API key.
-  # vllm.nix sets --served-model-name so clients can use a stable model id
-  # instead of the local /var/lib/vllm model directory path.
-  home.file.".pi/agent/models.json".text = builtins.toJSON {
-    providers = {
-      vllm = {
-        baseUrl = "http://localhost:8000/v1";
-        api = "openai-completions";
-        apiKey = "vllm";
-        compat = {
-          supportsDeveloperRole = false;
-          supportsReasoningEffort = false;
-        };
-        models = [
-          {
-            id = "qwen3-coder";
-            name = "qwen3-coder";
-            reasoning = true;
-            contextWindow = 262144;
-            maxTokens = 32768;
-          }
-        ];
+    git = {
+      enable = true;
+      settings = {
+        user.name = "Constantin Gavrilescu";
+        user.email = "comisarulmoldovan@gmail.com";
       };
     };
   };
@@ -95,45 +104,53 @@
     enable = true;
     defaultEditor = true;
     colorschemes.catppuccin.enable = true;
-    plugins.lualine.enable = true;
-    plugins.treesitter.enable = true;
-    plugins.which-key.enable = true;
-    plugins.telescope.enable = true;
-    plugins.telescope.extensions.fzf-native.enable = true;
-    plugins.telescope.extensions.file-browser.enable = true;
-    plugins.web-devicons.enable = true;
-    plugins.gitsigns.enable = true;
-    plugins.lsp.enable = true;
-    plugins.neo-tree.enable = true;
-    plugins.project-nvim.enable = true;
-    plugins.trouble.enable = true;
-    plugins.nvim-autopairs.enable = true;
-    plugins.vim-surround.enable = true;
-    plugins.lsp.servers = {
-      nil_ls.enable = true;
-      lua_ls.enable = true;
-    };
-    plugins.cmp.enable = true;
-    plugins.cmp.settings = {
-      snippet.expand = "function(args) require('luasnip').lsp_expand(args.body) end";
-      mapping = {
-        "<C-Space>" = "cmp.mapping.complete()";
-        "<CR>" = "cmp.mapping.confirm({ select = true })";
-        "<Tab>" = "cmp.mapping(function(fallback) if cmp.visible() then cmp.select_next_item() else fallback() end end, { 'i', 's' })";
-        "<S-Tab>" = "cmp.mapping(function(fallback) if cmp.visible() then cmp.select_prev_item() else fallback() end end, { 'i', 's' })";
+    plugins = {
+      lualine.enable = true;
+      treesitter.enable = true;
+      which-key.enable = true;
+      telescope = {
+        enable = true;
+        extensions.fzf-native.enable = true;
+        extensions.file-browser.enable = true;
       };
-      sources = [
-        { name = "nvim_lsp"; }
-        { name = "luasnip"; }
-        { name = "buffer"; }
-        { name = "path"; }
-      ];
+      web-devicons.enable = true;
+      gitsigns.enable = true;
+      lsp = {
+        enable = true;
+        servers = {
+          nil_ls.enable = true;
+          lua_ls.enable = true;
+        };
+      };
+      neo-tree.enable = true;
+      project-nvim.enable = true;
+      trouble.enable = true;
+      nvim-autopairs.enable = true;
+      vim-surround.enable = true;
+      cmp = {
+        enable = true;
+        settings = {
+          snippet.expand = "function(args) require('luasnip').lsp_expand(args.body) end";
+          mapping = {
+            "<C-Space>" = "cmp.mapping.complete()";
+            "<CR>" = "cmp.mapping.confirm({ select = true })";
+            "<Tab>" = "cmp.mapping(function(fallback) if cmp.visible() then cmp.select_next_item() else fallback() end end, { 'i', 's' })";
+            "<S-Tab>" = "cmp.mapping(function(fallback) if cmp.visible() then cmp.select_prev_item() else fallback() end end, { 'i', 's' })";
+          };
+          sources = [
+            { name = "nvim_lsp"; }
+            { name = "luasnip"; }
+            { name = "buffer"; }
+            { name = "path"; }
+          ];
+        };
+      };
+      luasnip.enable = true;
+      cmp-nvim-lsp.enable = true;
+      cmp-buffer.enable = true;
+      cmp-path.enable = true;
+      friendly-snippets.enable = true;
     };
-    plugins.luasnip.enable = true;
-    plugins.cmp-nvim-lsp.enable = true;
-    plugins.cmp-buffer.enable = true;
-    plugins.cmp-path.enable = true;
-    plugins.friendly-snippets.enable = true;
 
     # Basic options
     opts = {

@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+      - id: nixpkgs-fmt
+        name: nixpkgs-fmt
+        entry: nixpkgs-fmt
+        types: [nix]
+        language: system
+
+      - id: statix
+        name: statix
+        entry: statix
+        args: ["check", "--ignore", ".direnv"]
+        types: [nix]
+        language: system

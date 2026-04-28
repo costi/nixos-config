@@ -1,7 +1,6 @@
-{
-  pkgs,
-  pkgs-unstable,
-  ...
+{ pkgs
+, pkgs-unstable
+, ...
 }:
 let
   # Use a recent llama.cpp from nixpkgs-unstable. Qwen3.6 GGUF/MoE support and
@@ -120,5 +119,5 @@ in
     home = "/var/lib/llama-cpp";
     extraGroups = [ "video" "render" ];
   };
-  users.groups."llama-cpp" = {};
+  users.groups."llama-cpp" = { };
 }

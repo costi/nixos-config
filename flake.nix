@@ -37,7 +37,7 @@
       pkgs-unstable = import nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;
-        overlays = [];
+        overlays = [ ];
       };
       vllm-pkgs = import pkgs-vllm {
         inherit system;
@@ -91,14 +91,16 @@
           ./vllm.nix
 
           home-manager.nixosModules.home-manager
-          
+
           # nixvim.homeModules.nixvim
 
-          ({ ... }: {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = { inherit nixvim hermes-agent; };
-            home-manager.users.costi = import ./home.nix;
+          (_: {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = { inherit nixvim hermes-agent; };
+              users.costi = import ./home.nix;
+            };
           })
         ];
       };

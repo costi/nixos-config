@@ -10,6 +10,7 @@
   programs.bash.shellAliases = {
     vi = "nvim";
     vim = "nvim";
+    n = "nvim";
   };
 
   programs.git = {

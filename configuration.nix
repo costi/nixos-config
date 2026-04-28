@@ -48,6 +48,9 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # Deduplicate identical files in the store periodically (lightweight, reclaims space after big rebuilds)
+  nix.settings.auto-optimise-store = true;
+
   # Boot to text mode, but allow starting X manually via `startx`.
   services.xserver.enable = true;
   services.displayManager.gdm.enable = false;

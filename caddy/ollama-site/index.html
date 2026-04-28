@@ -121,14 +121,42 @@
         &quot;baseURL&quot;: &quot;https://ollama.random-studios.net/v1&quot;
       },
       &quot;models&quot;: {
-        &quot;Jackrong/Qwopus3.5-27B-v3&quot;: {
-          &quot;name&quot;: &quot;Qwopus 3.5 27B v3 (vLLM default)&quot;
+        &quot;qwen3-coder&quot;: {
+          &quot;name&quot;: &quot;Qwen3.6 27B AWQ INT4 (vLLM default)&quot;
         }
       }
     }
   }
 }</pre>
-          <p><code>Jackrong/Qwopus3.5-27B-v3</code> is the shared model currently served by the box.</p>
+          <p><code>qwen3-coder</code> is the alias for <code>cyankiwi/Qwen3.6-27B-AWQ-INT4</code>, currently served on the box.</p>
+        </section>
+
+        <section class="card">
+          <h2>pi-coding-agent</h2>
+          <p>Add this provider to <code>~/.pi/agent/models.json</code>:</p>
+          <pre>{
+  &quot;providers&quot;: {
+    &quot;remote-vllm&quot;: {
+      &quot;baseUrl&quot;: &quot;https://ollama.random-studios.net/v1&quot;,
+      &quot;api&quot;: &quot;openai-completions&quot;,
+      &quot;apiKey&quot;: &quot;&lt;your-token&gt;&quot;,
+      &quot;compat&quot;: {
+        &quot;supportsDeveloperRole&quot;: false,
+        &quot;supportsReasoningEffort&quot;: false
+      },
+      &quot;models&quot;: [
+        {
+          &quot;id&quot;: &quot;qwen3-coder&quot;,
+          &quot;name&quot;: &quot;qwen3-coder&quot;,
+          &quot;reasoning&quot;: true,
+          &quot;contextWindow&quot;: 262144,
+          &quot;maxTokens&quot;: 32768
+        }
+      ]
+    }
+  }
+}</pre>
+          <p>Replace <code>&lt;your-token&gt;</code> with your bearer token from the gateway.</p>
         </section>
 
         <section class="card">
@@ -152,7 +180,7 @@
       <section class="card">
         <h2>Available Models</h2>
         <ul class="models">
-          <li><code>Jackrong/Qwopus3.5-27B-v3</code> <span>single shared vLLM model, served via vLLM</span></li>
+          <li><code>qwen3-coder</code> <span>Qwen3.6 27B AWQ-INT4, aliased to <code>cyankiwi/Qwen3.6-27B-AWQ-INT4</code></span></li>
         </ul>
       </section>
     </main>

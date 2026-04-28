@@ -86,7 +86,7 @@
 
     Service = {
       Type = "simple";
-      ExecStart = "${hermes-agent.packages.${pkgs.system}.default}/bin/hermes gateway run --replace";
+      ExecStart = "${hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/hermes gateway run --replace";
       WorkingDirectory = "%h";
       Environment = [
         "HERMES_HOME=%h/.hermes"

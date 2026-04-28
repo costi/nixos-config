@@ -72,6 +72,8 @@
   systemd.defaultUnit = lib.mkForce "multi-user.target";
 
   services = {
+    displayManager.gdm.enable = false;
+
     xserver = {
       enable = true;
 
@@ -82,7 +84,6 @@
       };
 
       displayManager = {
-        gdm.enable = false;
         startx = {
           enable = true;
           generateScript = true;
@@ -264,7 +265,7 @@
   ] ++ [
     # Install Hermes from the system generation so the binary is rooted and
     # available on PATH, while the gateway itself still runs as a user service.
-    hermes-agent.packages.${pkgs.system}.default
+    hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
     pkgs-unstable.zellij
     pkgs-unstable.codex
     pkgs-unstable.opencode

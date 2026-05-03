@@ -5,6 +5,31 @@
 { config, lib, pkgs, pkgs-unstable, hermes-agent, ... }:
 
 let
+  # FieldOS needs Flutter integration tests on Android. Compose a pinned SDK
+  # through nixpkgs so adb, the emulator, platform tools, build tools, and the
+  # x86_64 Google APIs system image are all reproducible instead of installed
+  # mutably with sdkmanager.
+  fieldosAndroidSdk = pkgs.androidenv.composeAndroidPackages {
+    buildToolsVersions = [ "28.0.3" "35.0.0" "36.0.0" ];
+    platformVersions = [ "35" "36" ];
+    abiVersions = [ "x86_64" ];
+    systemImageTypes = [ "google_apis_playstore" ];
+    includeEmulator = true;
+    includeSystemImages = true;
+    includeNDK = false;
+    # Flutter's doctor asks sdkmanager about all remote Android licenses. Since
+    # the SDK is read-only in /nix/store, pre-populate the additional license
+    # hash files in the composed SDK so `flutter doctor` is clean.
+    extraLicenses = [
+      "android-googletv-license"
+      "android-googlexr-license"
+      "android-sdk-arm-dbt-license"
+      "android-sdk-preview-license"
+      "google-gdk-license"
+      "mips-android-sysimage-license"
+    ];
+  };
+
   rebuild-switch = pkgs.writeShellScriptBin "rebuild-switch" ''
     set -euo pipefail
 
@@ -34,7 +59,7 @@ in
   boot = {
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
-    kernelParams = [ "nvidia-drm.fbdev=1" ]; # desperately trying to have nvidia working in gnome
+    kernelParams = [ "nvidia-drm.fbdev=1" "consoleblank=300" ]; # desperately trying to have nvidia working in gnome
   };
 
   networking = {
@@ -184,6 +209,9 @@ in
           respond "<h1>LOL!!!!</h1><p>YOU LAUGH YOU DIE</p>"
         }
       '';
+      virtualHosts."http://lianli.local" = {
+        extraConfig = builtins.readFile ./caddy/vllm.lianli.local.caddy;
+      };
     };
 
     # Enable the OpenSSH daemon.
@@ -219,6 +247,8 @@ in
     };
   };
 
+  users.groups.adbusers = { };
+
   # Define a user account. Don't forget to set a password with 'passwd'.
   users.users = {
     costi = {
@@ -226,7 +256,7 @@ in
       description = "Constantin Gavrilescu";
       # Keep the user manager alive after logout so Hermes can keep running.
       linger = true;
-      extraGroups = [ "networkmanager" "wheel" ];
+      extraGroups = [ "networkmanager" "wheel" "adbusers" "kvm" ];
       openssh.authorizedKeys.keys = [
         "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDh132yLWmzThEcR66D0VFSH0RpT2XfU5m7waEeebOEgXrnLeLvijIV2TNm0ew0PX8AQiiszURFcJ53Tx7RQCKvszKhOIh40+DAeoIbIP6OhQLDkL5r9cQWRboaSN8WcAzEay3m243MfQWimsZKvOGlpk68sw8YdjEFulUZ9cCLZRURq5vie0e/m8VOsfFjt4EXObKp4GoBzzyzyd77f2pWgdpbbGv+LEUvZWgYmNfEM+v21dn87wZN1vbDWkNH7eofa+P1DNX0yahfyuewjOvd/jtaJertyiLcVKKZ0Ws3tV5EkDJjt+NIEzQLi8NwiN1al7z5LTKeUN+1XmHqAZYj costi@costi-linux-zuper"
       ];
@@ -255,19 +285,39 @@ in
   # Install firefox.
   programs = {
     firefox.enable = true;
+    # mobile testing needs adb access from the regular user account;
+    # this installs adb helpers/udev support and creates the adbusers group.
+    adb.enable = true;
     neovim = {
       enable = true; # system-wide nvim (e.g., root, other users)
       defaultEditor = true;
     };
   };
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
+  # Allow unfree packages. Android SDK system images and Play Store emulator
+  # images are also license-gated, so accept those declaratively for
+  # Flutter integration testing instead of relying on an interactive sdkmanager.
+  nixpkgs.config = {
+    allowUnfree = true;
+    android_sdk.accept_license = true;
+  };
 
   # Podman with Docker-compatible socket/CLI
   virtualisation = {
     podman.enable = true;
     podman.dockerCompat = true;
+  };
+
+  # web/mobile development defaults. Playwright's npm package normally downloads
+  # mutable browser binaries; point it at nixpkgs' packaged browsers so web tests
+  # are reproducible and work in NixOS' non-FHS filesystem layout.
+  environment.variables = {
+    ANDROID_HOME = "${fieldosAndroidSdk.androidsdk}/libexec/android-sdk";
+    ANDROID_SDK_ROOT = "${fieldosAndroidSdk.androidsdk}/libexec/android-sdk";
+    CHROME_EXECUTABLE = "${pkgs.chromium}/bin/chromium";
+    JAVA_HOME = "${pkgs.jdk17.home}";
+    PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+    PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
   };
 
   # List packages installed in system profile. To search, run:
@@ -280,6 +330,17 @@ in
     nodejs_22
     pnpm
     bun
+    # web, backend, and mobile tooling. Android SDK contents are pinned
+    # in fieldosAndroidSdk above so Flutter sees platform-tools, build-tools,
+    # emulator, and a Google APIs x86_64 system image without mutable installs.
+    playwright-driver
+    playwright-test
+    chromium
+    flutter
+    dart
+    jdk17
+    android-tools
+    fieldosAndroidSdk.androidsdk
     python3
     uv
     rustup

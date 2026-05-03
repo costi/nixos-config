@@ -1,0 +1,18 @@
+@internal {
+  # Allow RFC1918 IPv4 plus local IPv6 clients. 127.0.0.0/8 and ::1 keep
+  # host-local curl/tests allowed; IPv6 ULA (fc00::/7) covers private routed
+  # LANs, and fe80::/10 covers link-local/mDNS-style access.
+  not remote_ip 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fc00::/7 fe80::/10 ::1/128
+}
+
+handle @internal {
+  respond "forbidden" 403
+}
+
+handle {
+  # vLLM is deliberately bound only to loopback; Caddy is the LAN-facing gate.
+  # Use IPv4 explicitly because the vLLM service listens on 127.0.0.1, not ::1.
+  reverse_proxy 127.0.0.1:8000 {
+    header_up Host {upstream_hostport}
+  }
+}
